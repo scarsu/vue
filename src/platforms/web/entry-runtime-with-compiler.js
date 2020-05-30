@@ -1,10 +1,16 @@
 /* @flow */
-
+/* 
+  runtime + compiler完整版编译的入口
+  主要作用是将compile核心逻辑扩展至Vue.prototype.$mount
+  compile的作用是将template/el转为render函数
+ */
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
 
+// 上一层Vue定义自平台代码下的runtime运行时代码
 import Vue from './runtime/index'
+
 import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
@@ -14,7 +20,10 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 缓存src\platforms\web\runtime中定义的 Vue.prototype.$mount 方法
 const mount = Vue.prototype.$mount
+
+// 将编译工作扩展至$mount方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -30,10 +39,11 @@ Vue.prototype.$mount = function (
   }
 
   const options = this.$options
-  // resolve template/el and convert to render function
+  // 将 template/el 转为 render函数
   if (!options.render) {
     let template = options.template
     if (template) {
+    // template的优先级高于el
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
@@ -62,6 +72,7 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
+      // 编译工作的核心：compileToFunctions
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -79,6 +90,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 执行缓存的 mount方法
   return mount.call(this, el, hydrating)
 }
 

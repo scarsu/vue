@@ -1,5 +1,9 @@
 /* @flow */
 
+/* 
+  - 调用生命周期钩子
+ */
+
 import config from '../config'
 import Watcher from '../observer/watcher'
 import { mark, measure } from '../util/perf'
@@ -56,7 +60,9 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 组件更新
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    console.log("_update excuted")
     const vm: Component = this
     const prevEl = vm.$el
     const prevVnode = vm._vnode
@@ -65,10 +71,11 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // 初始渲染
+      // patch将vnode渲染成DOM
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // 更新渲染
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -200,7 +207,7 @@ export function mountComponent (
         callHook(vm, 'beforeUpdate')
       }
     }
-  }, true /* isRenderWatcher */)
+  }, true /* isRenderWatcher RenderWatcher的标识 */)
   hydrating = false
 
   // manually mounted instance, call mounted on self

@@ -1,6 +1,16 @@
 /* @flow */
 
+/* 
+  runtime 运行时代码（平台相关）
+  核心作用有：
+    定义平台相关的方法：Vue.prototype.__patch__
+    定义平台无关的方法：Vue.prototype.$mount
+ */
+
+
+// 上一层Vue定义来自于 src/core 中的 平台无关的核心代码
 import Vue from 'core/index'
+
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
@@ -45,6 +55,7 @@ Vue.prototype.$mount = function (
 // devtools global hook
 /* istanbul ignore next */
 if (inBrowser) {
+  // setTimeout(fn,0) 的作用是将函数立即加到当前任务队列，等队列中任务执行完后立即执行
   setTimeout(() => {
     if (config.devtools) {
       if (devtools) {

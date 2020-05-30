@@ -22,11 +22,13 @@ let uid = 0
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * watcher实例会解析一个表达式，收集依赖，当表达式值变更时，触发回调
+ * $watch() api 和 指令使用的也是 Watcher
  */
 export default class Watcher {
   vm: Component;
-  expression: string;
-  cb: Function;
+  expression: string; // 表达式
+  cb: Function; // 回调
   id: number;
   deep: boolean;
   user: boolean;
@@ -44,11 +46,12 @@ export default class Watcher {
 
   constructor (
     vm: Component,
-    expOrFn: string | Function,
+    expOrFn: string | Function, 
     cb: Function,
     options?: ?Object,
-    isRenderWatcher?: boolean
+    isRenderWatcher?: boolean // RenderWatcher的标识
   ) {
+    debugger
     this.vm = vm
     if (isRenderWatcher) {
       vm._watcher = this
@@ -57,7 +60,7 @@ export default class Watcher {
     // options
     if (options) {
       this.deep = !!options.deep
-      this.user = !!options.user
+      this.user = !!options.user  // 标识是否是用户通过 $watch api 定义的 watcher
       this.lazy = !!options.lazy
       this.sync = !!options.sync
       this.before = options.before
@@ -75,10 +78,12 @@ export default class Watcher {
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
-    // parse expression for getter
+    // 给getter解析表达式
     if (typeof expOrFn === 'function') {
+      // 传入一个函数：直接将函数作为getter
       this.getter = expOrFn
     } else {
+      // 传入的不是function，
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -97,13 +102,14 @@ export default class Watcher {
 
   /**
    * Evaluate the getter, and re-collect dependencies.
+   * 计算getter，重新收集依赖
    */
   get () {
     pushTarget(this)
     let value
     const vm = this.vm
     try {
-      value = this.getter.call(vm, vm)
+      value = this.getter.call(vm, vm)  // 触发 new Watcher 时传入的表达式
     } catch (e) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
@@ -111,19 +117,19 @@ export default class Watcher {
         throw e
       }
     } finally {
-      // "touch" every property so they are all tracked as
-      // dependencies for deep watching
+      // "touch" every property so they are all tracked as dependencies for deep watching
       if (this.deep) {
         traverse(value)
       }
       popTarget()
-      this.cleanupDeps()
+      this.cleanupDeps()  // 清除依赖：清除掉上次收集到的 这次没收集到的 依赖，优化性能，例如v-if导致的依赖差异
     }
     return value
   }
 
   /**
    * Add a dependency to this directive.
+   * 向watcher添加一个依赖
    */
   addDep (dep: Dep) {
     const id = dep.id
@@ -138,6 +144,7 @@ export default class Watcher {
 
   /**
    * Clean up for dependency collection.
+   * 清除依赖：清除掉上次收集到的 这次没收集到的 依赖，优化性能，例如v-if导致的依赖差异
    */
   cleanupDeps () {
     let i = this.deps.length
@@ -160,6 +167,7 @@ export default class Watcher {
   /**
    * Subscriber interface.
    * Will be called when a dependency changes.
+   * 订阅者的接口，当依赖变更时，会被触发
    */
   update () {
     /* istanbul ignore else */
@@ -206,6 +214,7 @@ export default class Watcher {
   /**
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
+   * 计算watcher的值，只有懒监听器(computed watcher)才会调用这个方法
    */
   evaluate () {
     this.value = this.get()
@@ -214,6 +223,7 @@ export default class Watcher {
 
   /**
    * Depend on all deps collected by this watcher.
+   * 触发所有收集到的依赖的depend方法（depend -> watcher.addDep）
    */
   depend () {
     let i = this.deps.length
@@ -224,6 +234,7 @@ export default class Watcher {
 
   /**
    * Remove self from all dependencies' subscriber list.
+   * 将自身从所有依赖的订阅者列表移除。
    */
   teardown () {
     if (this.active) {

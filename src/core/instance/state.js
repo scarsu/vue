@@ -35,6 +35,11 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+/* 
+  将属性代理至vm的原型上
+  proxy(vm, `_props`, key)
+  vm[key] 取值自 vm._props[key] 
+ */
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -45,6 +50,9 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+/* 
+  initState 的作用是将 data/props 转换为响应式对象，当 data/props 发生变化时，驱动视图变化。
+ */
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -64,8 +72,6 @@ export function initState (vm: Component) {
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
-  // cache prop keys so that future props updates can iterate using Array
-  // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
@@ -73,11 +79,12 @@ function initProps (vm: Component, propsOptions: Object) {
     toggleObserving(false)
   }
   for (const key in propsOptions) {
+    // 将props的键缓存起来，以便于后续的props更新可以使用数组循环，而不是动态对象的键枚举(数组遍历的性能高很多)
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      const hyphenatedKey = hyphenate(key)
+      const hyphenatedKey = hyphenate(key)  //转连字符格式键
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
         warn(
@@ -99,9 +106,8 @@ function initProps (vm: Component, propsOptions: Object) {
     } else {
       defineReactive(props, key, value)
     }
-    // static props are already proxied on the component's prototype
-    // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
+    // 静态props 已经在Vue.extend()过程中 被代理至vm的原型上.
+    // 此处只需要代理实例化过程中定义的props.
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -122,7 +128,7 @@ function initData (vm: Component) {
       vm
     )
   }
-  // proxy data on instance
+  // 将data代理至vm原型属性上，data键不可与props/methods键/保留值相同
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
@@ -164,6 +170,7 @@ export function getData (data: Function, vm: Component): any {
   }
 }
 
+// computedWatcher默认lazy
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
