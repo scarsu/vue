@@ -865,6 +865,8 @@
    * dynamically accessing methods on Array prototype
    */
 
+  // 通过 Object.create 方法定义一个中间对象
+  // 将其 __proto__ 设置为 Array.prototype
   var arrayProto = Array.prototype;
   var arrayMethods = Object.create(arrayProto);
 
@@ -880,15 +882,20 @@
 
   /**
    * Intercept mutating methods and emit events
+   * 拦截原Array原型上的数组变更方法 并通知依赖更新
    */
   methodsToPatch.forEach(function (method) {
-    // cache original method
+    // 缓存原方法
     var original = arrayProto[method];
+
+    // 调用Object.defineProperty
     def(arrayMethods, method, function mutator () {
       var args = [], len = arguments.length;
       while ( len-- ) args[ len ] = arguments[ len ];
 
+      // 调用原方法
       var result = original.apply(this, args);
+      // 通过正在处理的响应式数据value上的__ob__属性拿到observer实例
       var ob = this.__ob__;
       var inserted;
       switch (method) {
@@ -900,8 +907,10 @@
           inserted = args.slice(2);
           break
       }
+      // 将数组项也转换为响应式数据
       if (inserted) { ob.observeArray(inserted); }
       // notify change
+      // 通知依赖更新
       ob.dep.notify();
       return result
     });
@@ -977,6 +986,7 @@
   /**
    * Augment a target Object or Array by intercepting
    * the prototype chain using __proto__
+   * 通过 __proto__ 属性拦截原型链，以扩展目标对象/数组
    */
   function protoAugment (target, src) {
     /* eslint-disable no-proto */
@@ -987,6 +997,7 @@
   /**
    * Augment a target Object or Array by defining
    * hidden properties.
+   * 通过 __proto__ 属性拦截原型链，以扩展目标对象/数组
    */
   /* istanbul ignore next */
   function copyAugment (target, src, keys) {
