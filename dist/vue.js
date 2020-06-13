@@ -935,6 +935,7 @@
     this.vmCount = 0;
     def(value, '__ob__', this);//将observer实例 添加至value的__ob__属性，例如：vm._data.__ob__
     if (Array.isArray(value)) {
+      debugger
       if (hasProto) {
         protoAugment(value, arrayMethods);
       } else {
@@ -1929,6 +1930,12 @@
       copies[i]();
     }
   }
+  // 在<=2.4版本中，vue使用的全是微任务来实现异步延迟
+    // 缺点是在某些场景下，微任务拥有过高的优先级，使其在本应连续的事件甚至同一事件的冒泡过程中被触发
+  // 在 2.5 版本中是用宏任务结合微任务来实现异步延迟的
+    // 默认使用微任务，但是暴露了一个可以强制使用宏任务的接口
+    // 缺点是使用宏任务时，当在重绘前有状态变更时，会出现微妙的问题。
+  // 在 2.6 版本中，全部重新使用微任务来实现异步延迟，恢复到 <=2.4版本的方案
 
   // Here we have async deferring wrappers using microtasks.
   // In 2.5 we used (macro) tasks (in combination with microtasks).
@@ -1943,12 +1950,17 @@
   // or even between bubbling of the same event (#6566).
   var timerFunc;
 
+  // nextTick行为利用了微任务队列，微任务队列可以通过原生Promise.then或MutationObserver访问到。 
+  // MutationObserver具有更广泛的支持，但是在iOS> = 9.3.3中的UIWebView中，在触摸事件处理程序中触发时会发生错误。触发几次后，它将完全停止工作
+  // 因此，如果原生Promise可用，优先使用Promise：
+
   // The nextTick behavior leverages the microtask queue, which can be accessed
   // via either native Promise.then or MutationObserver.
   // MutationObserver has wider support, however it is seriously bugged in
   // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
   // completely stops working after triggering a few times... so, if native
   // Promise is available, we will use it:
+
   /* istanbul ignore next, $flow-disable-line */
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
     var p = Promise.resolve();
@@ -1959,6 +1971,9 @@
       // microtask queue but the queue isn't being flushed, until the browser
       // needs to do some other work, e.g. handle a timer. Therefore we can
       // "force" the microtask queue to be flushed by adding an empty timer.
+
+      // 在有问题的UIWebViews中，会出现奇怪的状态：微任务队列中有回调但是不被清空，直到浏览器有其他任务，例如处理计时器
+      // 因此此处使用一个空计时器，来强制触发微任务队列执行
       if (isIOS) { setTimeout(noop); }
     };
   } else if (!isIE && typeof MutationObserver !== 'undefined' && (
@@ -1983,11 +1998,15 @@
     // Fallback to setImmediate.
     // Techinically it leverages the (macro) task queue,
     // but it is still a better choice than setTimeout.
+
+    // setImmediate,宏任务,但是相比 setTimeout 是个更好的选择
     timerFunc = function () {
       setImmediate(flushCallbacks);
     };
   } else {
     // Fallback to setTimeout.
+
+    // setTimeout 0 宏任务
     timerFunc = function () {
       setTimeout(flushCallbacks, 0);
     };
@@ -3108,15 +3127,15 @@
 
   /*  */
 
-  var MAX_UPDATE_COUNT = 100;
+  var MAX_UPDATE_COUNT = 100; // 最大执行任务数量，用于限制最大任务数量，避免死循环
 
-  var queue = [];
+  var queue = [];  // watcher队列
   var activatedChildren = [];
-  var has = {};
-  var circular = {};
-  var waiting = false;
-  var flushing = false;
-  var index = 0;
+  var has = {};  // 用于跳过重复的watcher更新任务（根据watcher的id来做标识
+  var circular = {};  // 用于限制最大任务数量，避免死循环
+  var waiting = false; // 用于标识当前正在执行任务队列 或者 正在等待nextTick，需要等待，
+  var flushing = false;  // 用于标识当前正在执行任务队列，queue不可更改
+  var index = 0; // 当前正在执行的 watcher 在队列中的索引
 
   /**
    * Reset the scheduler's state.
@@ -3145,10 +3164,16 @@
     //    user watchers are created before the render watcher)
     // 3. If a component is destroyed during a parent component's watcher run,
     //    its watchers can be skipped.
+    
+    // 清空队列之前排序，为了确保:
+    //  1。更新组件的顺序是从父到子。(因为父组件总是先于子组件创建)
+    //  2。组件的user watcher 在 render watcher之前执行(因为user watcher总是先于render watcher创建)
+    //  3。如果一个组件在父组件的watcher执行过程中被销毁，可以跳过这个组件的watcher
     queue.sort(function (a, b) { return a.id - b.id; });
 
     // do not cache length because more watchers might be pushed
     // as we run existing watchers
+    // 不要将队列的长度缓存起来，因为在清空队列的过程中，可能会有新的watcher被加进来 
     for (index = 0; index < queue.length; index++) {
       watcher = queue[index];
       if (watcher.before) {
@@ -3175,12 +3200,14 @@
     }
 
     // keep copies of post queues before resetting state
+    // 在重置状态之前 备份已发布队列
     var activatedQueue = activatedChildren.slice();
     var updatedQueue = queue.slice();
 
     resetSchedulerState();
 
     // call component updated and activated hooks
+    // 触发组件的updated and activated钩子
     callActivatedHooks(activatedQueue);
     callUpdatedHooks(updatedQueue);
 
@@ -3224,6 +3251,8 @@
    * Push a watcher into the watcher queue.
    * Jobs with duplicate IDs will be skipped unless it's
    * pushed when the queue is being flushed.
+   * 将watcher加入队列中
+   * 重复的watcher id的任务会被跳过，除非队列已经被清空
    */
   function queueWatcher (watcher) {
     var id = watcher.id;
@@ -3234,7 +3263,10 @@
       } else {
         // if already flushing, splice the watcher based on its id
         // if already past its id, it will be run next immediately.
-        var i = queue.length - 1;
+        // 如果正在执行任务队列，将当前的watcher根据其id大小，拼接到队列中，以保证watcher接下来可以被立即执行
+        var i = queue.length - 1;  
+        // i:队列末尾
+        // index：当前正在执行的 watcher 在队列中的索引
         while (i > index && queue[i].id > watcher.id) {
           i--;
         }
@@ -3248,6 +3280,7 @@
           flushSchedulerQueue();
           return
         }
+        // 在nextTick后执行watcher队列
         nextTick(flushSchedulerQueue);
       }
     }
@@ -3279,6 +3312,7 @@
       vm._watcher = this;
     }
     vm._watchers.push(this);
+
     // options
     if (options) {
       this.deep = !!options.deep;
@@ -3289,6 +3323,12 @@
     } else {
       this.deep = this.user = this.lazy = this.sync = false;
     }
+    // 找出哪些watcher是sync/lazy的
+    // if(this.lazy || this.sync){
+      // debugger
+      console.log(this);
+    // }
+
     this.cb = cb;
     this.id = ++uid$1; // uid for batching
     this.active = true;
@@ -3304,7 +3344,7 @@
       // 传入一个函数：直接将函数作为getter
       this.getter = expOrFn;
     } else {
-      // 传入的不是function，
+      // 传入的不是function，是data/props的键路径
       this.getter = parsePath(expOrFn);
       if (!this.getter) {
         this.getter = noop;
@@ -3366,6 +3406,7 @@
   /**
    * Clean up for dependency collection.
    * 清除依赖：清除掉上次收集到的 这次没收集到的 依赖，优化性能，例如v-if导致的依赖差异
+   * 仅在watcher.get末尾被调用
    */
   Watcher.prototype.cleanupDeps = function cleanupDeps () {
     var i = this.deps.length;
@@ -3767,6 +3808,7 @@
     if (typeof handler === 'string') {
       handler = vm[handler];
     }
+    debugger
     return vm.$watch(expOrFn, handler, options)
   }
 

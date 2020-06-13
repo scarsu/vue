@@ -9,22 +9,42 @@ new Vue({
   components: {child},
   data:()=>{
     return { 
-      message1: 'Hello',
-      message2: 'Vue!'
+      messageA: 'Hello',
+      messageB: 'Vue!',
+      watchPropA:1
     }
   },
   mounted(){
     debugger
-    this.message1="new"
+    this.messageA="new"
   },
   computed: {
     message:{
-      get:function(){ return this.message1 + ' ' + this.message2},
+      get:function(){ return this.messageA + ' ' + this.messageB},
       set:function(val){ 
         debugger
-        this.message1=val.split(' ')[0]
-        this.message2=val.split(' ')[1]
+        this.messageA=val.split(' ')[0]
+        this.messageB=val.split(' ')[0]
       }
+    },
+    messageAA:{
+      get:function(){ return this.messageA + ' ' + this.messageA},
+      set:function(val){ 
+        debugger
+        this.messageA=val.split(' ')[0]
+      }
+    },
+    messageBB:{
+      get:function(){ return this.messageB + ' ' + this.messageB},
+      set:function(val){ 
+        debugger
+        this.messageB=val.split(' ')[0]
+      }
+    }
+  },
+  watch: {
+    watchPropA:function(newVal,oldVal){
+      console.log([newVal,oldVal]);
     }
   }
 })

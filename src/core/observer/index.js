@@ -47,6 +47,7 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)  //将observer实例 添加至value的__ob__属性，例如：vm._data.__ob__
     if (Array.isArray(value)) {
+      debugger
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {

@@ -27,22 +27,22 @@ let uid = 0
  */
 export default class Watcher {
   vm: Component;
-  expression: string; // 表达式
-  cb: Function; // 回调
+  expression: string; // 用于获取watcher值的表达式
+  cb: Function; // watcher的回调函数
   id: number;
   deep: boolean;
   user: boolean;
   lazy: boolean;
-  sync: boolean;
-  dirty: boolean;
+  sync: boolean;  // 同步标志（如果watcher是异步，订阅者调用update会不会立即执行回调，而是将任务放在了队列中，通过调度器异步执行；如果是同步，则立即执行
+  dirty: boolean; // 当前watcher的依赖已经有变更（但是watcher还没有更新
   active: boolean;
-  deps: Array<Dep>;
+  deps: Array<Dep>; // 用于存储watcher的依赖
   newDeps: Array<Dep>;
   depIds: SimpleSet;
   newDepIds: SimpleSet;
-  before: ?Function;
-  getter: Function;
-  value: any;
+  before: ?Function; // 调度器执行watcher回调之前执行的函数，例如renderWatcher会给before属性传入一个函数，用于触发beforeUpdate生命周期钩子
+  getter: Function; // 解析expression得到
+  value: any; // watcher的值
 
   constructor (
     vm: Component,
@@ -57,6 +57,7 @@ export default class Watcher {
       vm._watcher = this
     }
     vm._watchers.push(this)
+
     // options
     if (options) {
       this.deep = !!options.deep
@@ -67,6 +68,12 @@ export default class Watcher {
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
+    // 找出哪些watcher是sync/lazy的
+    // if(this.lazy || this.sync){
+      // debugger
+      console.log(this)
+    // }
+
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -83,7 +90,7 @@ export default class Watcher {
       // 传入一个函数：直接将函数作为getter
       this.getter = expOrFn
     } else {
-      // 传入的不是function，
+      // 传入的不是function，是data/props的键路径
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -145,6 +152,7 @@ export default class Watcher {
   /**
    * Clean up for dependency collection.
    * 清除依赖：清除掉上次收集到的 这次没收集到的 依赖，优化性能，例如v-if导致的依赖差异
+   * 仅在watcher.get末尾被调用
    */
   cleanupDeps () {
     let i = this.deps.length
