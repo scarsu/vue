@@ -1121,19 +1121,23 @@
     if (
       (isUndef(target) || isPrimitive(target))
     ) {
+      // 不能给undefined, null, 原始类型值设置响应式对象
       warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
     }
     if (Array.isArray(target) && isValidArrayIndex(key)) {
+      // 使用索引来更改数组项，转换为使用扩展过的 splice 方法
       target.length = Math.max(target.length, key);
       target.splice(key, 1, val);
       return val
     }
     if (key in target && !(key in Object.prototype)) {
+      // 已存在的属性直接赋值
       target[key] = val;
       return val
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
+      // 不能给vue实例 / vue实例的根data 设置响应式属性，应该提前在data option中设置
        warn(
         'Avoid adding reactive properties to a Vue instance or its root $data ' +
         'at runtime - declare it upfront in the data option.'
@@ -1141,10 +1145,13 @@
       return val
     }
     if (!ob) {
+      // 如果target本身不是响应式对象，直接赋值
       target[key] = val;
       return val
     }
+    // 调用defineReactive将新属性转换为响应式属性
     defineReactive(ob.value, key, val);
+    // 向订阅发布更新通知
     ob.dep.notify();
     return val
   }
@@ -1159,6 +1166,7 @@
       warn(("Cannot delete reactive property on undefined, null, or primitive value: " + ((target))));
     }
     if (Array.isArray(target) && isValidArrayIndex(key)) {
+      // 通过数组索引操作时，转换为使用splice方法
       target.splice(key, 1);
       return
     }
@@ -1177,6 +1185,7 @@
     if (!ob) {
       return
     }
+    // 发布订阅
     ob.dep.notify();
   }
 
@@ -3574,6 +3583,7 @@
     var keys = vm.$options._propKeys = [];
     var isRoot = !vm.$parent;
     // root instance props should be converted
+    debugger
     if (!isRoot) {
       toggleObserving(false);
     }
@@ -7136,7 +7146,7 @@
     // allow v-model="obj.val " (trailing whitespace)
     val = val.trim();
     len = val.length;
-
+  debugger
     if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
       index$1 = val.lastIndexOf('.');
       if (index$1 > -1) {
@@ -10937,6 +10947,7 @@
     }
     // component v-model
     if (el.model) {
+      debugger
       data += "model:{value:" + (el.model.value) + ",callback:" + (el.model.callback) + ",expression:" + (el.model.expression) + "},";
     }
     // inline-template
@@ -11531,6 +11542,12 @@
       optimize(ast, options);
     }
     var code = generate(ast, options);
+    console.log('%ctemplate:','color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
+    console.log(("" + (template.trim())));
+    console.log("%c==========================================",'color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
+    console.log('%crender函数:','color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
+    console.log(("" + (code.render)));
+    console.log("%c==========================================",'color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
     return {
       ast: ast,
       render: code.render,

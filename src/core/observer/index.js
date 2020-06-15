@@ -225,19 +225,23 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
+    // 不能给undefined, null, 原始类型值设置响应式对象
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 使用索引来更改数组项，转换为使用扩展过的 splice 方法
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
   if (key in target && !(key in Object.prototype)) {
+    // 已存在的属性直接赋值
     target[key] = val
     return val
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
+    // 不能给vue实例 / vue实例的根data 设置响应式属性，应该提前在data option中设置
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
@@ -245,10 +249,13 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     return val
   }
   if (!ob) {
+    // 如果target本身不是响应式对象，直接赋值
     target[key] = val
     return val
   }
+  // 调用defineReactive将新属性转换为响应式属性
   defineReactive(ob.value, key, val)
+  // 向订阅发布更新通知
   ob.dep.notify()
   return val
 }
@@ -263,6 +270,7 @@ export function del (target: Array<any> | Object, key: any) {
     warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
+    // 通过数组索引操作时，转换为使用splice方法
     target.splice(key, 1)
     return
   }
@@ -281,6 +289,7 @@ export function del (target: Array<any> | Object, key: any) {
   if (!ob) {
     return
   }
+  // 发布订阅
   ob.dep.notify()
 }
 
