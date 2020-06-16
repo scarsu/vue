@@ -321,7 +321,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
-  debugger
+  
   return vm.$watch(expOrFn, handler, options)
 }
 

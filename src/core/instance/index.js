@@ -12,12 +12,13 @@ import { warn } from '../util/index'
 
 // 定义Vue构造函数
 function Vue (options) {
+  console.log('%c开始执行Vue构造函数，执行语句：new Vue(options);','font-size:1.5em;color:red;background-color:pink;')
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
-  debugger
+  
 
   // vm._init私有方法来自于下面的initMixin
   this._init(options)

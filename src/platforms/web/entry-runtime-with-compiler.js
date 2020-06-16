@@ -28,6 +28,7 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  console.log('%c开始执行带有编译器的 vm.$mount 挂载函数，执行语句：vm.$mount(vm.$options.el);','font-size:1.5em;color:red;background-color:pink;')
   el = el && query(el)
 
   /* istanbul ignore if */

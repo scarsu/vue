@@ -15,9 +15,11 @@ export function initExtend (Vue: GlobalAPI) {
 
   /**
    * Class inheritance
+   * VueComponent继承Vue
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
+    // 这里的this 是 Vue
     const Super = this
     const SuperId = Super.cid
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
@@ -30,7 +32,9 @@ export function initExtend (Vue: GlobalAPI) {
       validateComponentName(name)
     }
 
+    // sub是VueComponent，继承自Vue，因此 VueComponent 的实例也拥有Vue实例的所有原型方法
     const Sub = function VueComponent (options) {
+      console.log('%c 执行 VueComponent 构造函数，创建Vue组件，执行代码new vnode.componentOptions.Ctor(options)','font-size:1.5em;color:red;background-color:pink;')
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)

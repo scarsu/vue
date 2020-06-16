@@ -62,7 +62,8 @@ export function initLifecycle (vm: Component) {
 export function lifecycleMixin (Vue: Class<Component>) {
   // 组件更新
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
-    console.log("_update excuted")
+    
+    console.log('%c 执行 vm._update，渲染视图','font-size:1.5em;color:red;background-color:pink;')
     const vm: Component = this
     const prevEl = vm.$el
     const prevVnode = vm._vnode
@@ -150,6 +151,7 @@ export function mountComponent (
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  console.log('%c开始执行 mountComponent 函数，执行语句：mountComponent(this, el, hydrating),返回值vm','font-size:1.5em;color:red;background-color:pink;')
   vm.$el = el
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
@@ -194,6 +196,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      console.log('%c renderWatcher 被触发，重新渲染视图','font-size:1.5em;color:red;background-color:pink;')
       vm._update(vm._render(), hydrating)
     }
   }
@@ -201,6 +204,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  console.log('%c开始执行 Watcher 构造函数，创建renderWatcher','font-size:1.5em;color:red;background-color:pink;')
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
@@ -336,6 +340,7 @@ export function callHook (vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  console.log(`%c${info}`,'font-size:2em;color:yellow;background-color:orange')
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

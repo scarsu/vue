@@ -19,7 +19,7 @@ export default class Dep {
   subs: Array<Watcher>; //watcher数组，订阅者
 
   constructor () {
-    debugger
+    
     this.id = uid++
     this.subs = []
   }

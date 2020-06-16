@@ -51,7 +51,7 @@ export default class Watcher {
     options?: ?Object,
     isRenderWatcher?: boolean // RenderWatcher的标识
   ) {
-    debugger
+    
     this.vm = vm
     if (isRenderWatcher) {
       vm._watcher = this
@@ -70,7 +70,7 @@ export default class Watcher {
     }
     // 找出哪些watcher是sync/lazy的
     // if(this.lazy || this.sync){
-      // debugger
+      // 
       console.log(this)
     // }
 

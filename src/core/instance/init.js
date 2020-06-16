@@ -14,6 +14,7 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
+    console.log('%c开始执行 vm._init，执行语句：this._init(options);','font-size:1.5em;color:red;background-color:pink;')
     const vm: Component = this
     // a uid
     vm._uid = uid++

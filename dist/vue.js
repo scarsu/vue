@@ -717,7 +717,7 @@
    * dep是对 Watcher 的一种管理
    */
   var Dep = function Dep () {
-    debugger
+      
     this.id = uid++;
     this.subs = [];
   };
@@ -944,7 +944,7 @@
     this.vmCount = 0;
     def(value, '__ob__', this);//将observer实例 添加至value的__ob__属性，例如：vm._data.__ob__
     if (Array.isArray(value)) {
-      debugger
+        
       if (hasProto) {
         protoAugment(value, arrayMethods);
       } else {
@@ -1073,7 +1073,7 @@
       enumerable: true,
       configurable: true,
       get: function reactiveGetter () {
-        debugger
+        
         // 调用属性原 getter
         var value = getter ? getter.call(obj) : val;
         
@@ -1089,7 +1089,7 @@
         return value
       },
       set: function reactiveSetter (newVal) {
-        debugger
+        
         var value = getter ? getter.call(obj) : val;
         /* eslint-disable no-self-compare */
         if (newVal === value || (newVal !== newVal && value !== value)) {
@@ -2865,7 +2865,8 @@
   function lifecycleMixin (Vue) {
     // 组件更新
     Vue.prototype._update = function (vnode, hydrating) {
-      console.log("_update excuted");
+      
+      console.log('%c 执行 vm._update，渲染视图','font-size:1.5em;color:red;background-color:pink;');
       var vm = this;
       var prevEl = vm.$el;
       var prevVnode = vm._vnode;
@@ -2953,6 +2954,7 @@
     el,
     hydrating
   ) {
+    console.log('%c开始执行 mountComponent 函数，执行语句：mountComponent(this, el, hydrating),返回值vm','font-size:1.5em;color:red;background-color:pink;');
     vm.$el = el;
     if (!vm.$options.render) {
       vm.$options.render = createEmptyVNode;
@@ -2997,6 +2999,7 @@
       };
     } else {
       updateComponent = function () {
+        console.log('%c renderWatcher 被触发，重新渲染视图','font-size:1.5em;color:red;background-color:pink;');
         vm._update(vm._render(), hydrating);
       };
     }
@@ -3004,6 +3007,7 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
+    console.log('%c开始执行 Watcher 构造函数，创建renderWatcher','font-size:1.5em;color:red;background-color:pink;');
     new Watcher(vm, updateComponent, noop, {
       before: function before () {
         if (vm._isMounted && !vm._isDestroyed) {
@@ -3139,6 +3143,7 @@
         invokeWithErrorHandling(handlers[i], vm, null, vm, info);
       }
     }
+    console.log(("%c" + info),'font-size:2em;color:yellow;background-color:orange');
     if (vm._hasHookEvent) {
       vm.$emit('hook:' + hook);
     }
@@ -3326,7 +3331,7 @@
     options,
     isRenderWatcher // RenderWatcher的标识
   ) {
-    debugger
+      
     this.vm = vm;
     if (isRenderWatcher) {
       vm._watcher = this;
@@ -3345,7 +3350,7 @@
     }
     // 找出哪些watcher是sync/lazy的
     // if(this.lazy || this.sync){
-      // debugger
+      // 
       console.log(this);
     // }
 
@@ -3829,7 +3834,7 @@
     if (typeof handler === 'string') {
       handler = vm[handler];
     }
-    debugger
+    
     return vm.$watch(expOrFn, handler, options)
   }
 
@@ -4649,6 +4654,7 @@
     alwaysNormalize
   ) {
     if (Array.isArray(data) || isPrimitive(data)) {
+      // 如果data传的是数组，作为子节点处理
       normalizationType = children;
       children = data;
       data = undefined;
@@ -4668,6 +4674,7 @@
   ) {
     if (isDef(data) && isDef((data).__ob__)) {
        warn(
+        // 传给vnode的data属性，不允许使用响应式数据，每次渲染都创建最新的vnode data 对象
         "Avoid using observed data object as vnode data: " + (JSON.stringify(data)) + "\n" +
         'Always create fresh vnode data objects in each render!',
         context
@@ -4879,6 +4886,7 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
+      console.log('%c开始执行 vm._init，执行语句：this._init(options);','font-size:1.5em;color:red;background-color:pink;');
       var vm = this;
       // a uid
       vm._uid = uid$2++;
@@ -4997,12 +5005,13 @@
 
   // 定义Vue构造函数
   function Vue (options) {
+    console.log('%c开始执行Vue构造函数，执行语句：new Vue(options);','font-size:1.5em;color:red;background-color:pink;');
     if (
       !(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
     }
-    debugger
+    
 
     // vm._init私有方法来自于下面的initMixin
     this._init(options);
@@ -5075,9 +5084,11 @@
 
     /**
      * Class inheritance
+     * VueComponent继承Vue
      */
     Vue.extend = function (extendOptions) {
       extendOptions = extendOptions || {};
+      // 这里的this 是 Vue
       var Super = this;
       var SuperId = Super.cid;
       var cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {});
@@ -5090,7 +5101,9 @@
         validateComponentName(name);
       }
 
+      // sub是VueComponent，继承自Vue，因此 VueComponent 的实例也拥有Vue实例的所有原型方法
       var Sub = function VueComponent (options) {
+        console.log('%c 执行 VueComponent 构造函数，创建Vue组件，执行代码new vnode.componentOptions.Ctor(options)','font-size:1.5em;color:red;background-color:pink;');
         this._init(options);
       };
       Sub.prototype = Object.create(Super.prototype);
@@ -5843,6 +5856,7 @@
       ownerArray,
       index
     ) {
+      console.log('%c 执行 patch 的核心函数 createElm，创建dom','font-size:1.5em;color:red;background-color:pink;');
       if (isDef(vnode.elm) && isDef(ownerArray)) {
         // This vnode was used in a previous render!
         // now it's used as a new node, overwriting its elm would cause
@@ -5911,6 +5925,7 @@
     }
 
     function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+      console.log('%c 执行 createComponent 函数，创建组件','font-size:1.5em;color:red;background-color:pink;');
       var i = vnode.data;
       if (isDef(i)) {
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
@@ -5989,6 +6004,7 @@
     function createChildren (vnode, children, insertedVnodeQueue) {
       // 深度优先遍历
       // 递归调用 createElm
+      console.log('%c 执行 patch 的相关函数 createChildren，深度优先遍历 vnode树，递归调用createElm','font-size:1.5em;color:red;background-color:pink;');
       if (Array.isArray(children)) {
         {
           checkDuplicateKeys(children);
@@ -6407,8 +6423,8 @@
     }
 
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
-      // hydrating表示是否是服务端渲染
 
+      // hydrating表示是否是服务端渲染
       // 初次render 传入的oldVnode是 vm.$el
       // vnode参数来自于render函数的返回值
       if (isUndef(vnode)) {
@@ -6421,12 +6437,14 @@
       var insertedVnodeQueue = [];
 
       if (isUndef(oldVnode)) {
+        console.log('%c 执行 vm.__patch__，初次渲染，将vdom转为DOM，放在vnode.elm上返回','font-size:1.5em;color:red;background-color:pink;');
         // 不传入oldVnode的情况：空挂载组件、new一个根组件
         // empty mount (likely as component), create new root element
         isInitialPatch = true;
         // 直接创建DOM : vnode.elm
         createElm(vnode, insertedVnodeQueue);
       } else {
+        console.log('%c 执行 vm.__patch__，更新渲染，将vdom转为DOM，放在vnode.elm上返回','font-size:1.5em;color:red;background-color:pink;');
         // 判断oldVnode是DOM：oldVnode.nodeType有值
         var isRealElement = isDef(oldVnode.nodeType);
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
@@ -7146,7 +7164,7 @@
     // allow v-model="obj.val " (trailing whitespace)
     val = val.trim();
     len = val.length;
-  debugger
+
     if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
       index$1 = val.lastIndexOf('.');
       if (index$1 > -1) {
@@ -7230,6 +7248,7 @@
   var RANGE_TOKEN = '__r';
   var CHECKBOX_RADIO_TOKEN = '__c';
 
+  // model指令对应的代码生成处理函数
   function model (
     el,
     dir,
@@ -7343,6 +7362,10 @@
     addHandler(el, 'change', code, null, true);
   }
 
+  // 默认的model指令处理函数，对应input和textarea类型节点
+  // 核心逻辑1.将data赋值给节点的value属性，data变更可以触发节点value变更
+  // 核心逻辑2.给节点添加 input事件处理函数，将用户输入值绑定到data上
+  // 类似 if($event.target.composing)return;dataXX=$event.target.value
   function genDefaultModel (
     el,
     value,
@@ -8945,6 +8968,7 @@
     el,
     hydrating
   ) {
+    console.log('%c开始执行 vm.$mount 挂载函数，执行语句：Vue.prototype.$mount.call(this, el, hydrating)','font-size:1.5em;color:red;background-color:pink;');
     el = el && inBrowser ? query(el) : undefined;
     return mountComponent(this, el, hydrating)
   };
@@ -10947,7 +10971,7 @@
     }
     // component v-model
     if (el.model) {
-      debugger
+      
       data += "model:{value:" + (el.model.value) + ",callback:" + (el.model.callback) + ",expression:" + (el.model.expression) + "},";
     }
     // inline-template
@@ -11542,12 +11566,12 @@
       optimize(ast, options);
     }
     var code = generate(ast, options);
-    console.log('%ctemplate:','color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
+    console.log('%c<template>==========================================','color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
     console.log(("" + (template.trim())));
-    console.log("%c==========================================",'color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
-    console.log('%crender函数:','color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
+    console.log("%c</template>==========================================",'color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em');
+    console.log('%c<render函数>==========================================','color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
     console.log(("" + (code.render)));
-    console.log("%c==========================================",'color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
+    console.log("%c</render函数>==========================================",'color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em');
     return {
       ast: ast,
       render: code.render,
@@ -11590,6 +11614,7 @@
     el,
     hydrating
   ) {
+    console.log('%c开始执行带有编译器的 vm.$mount 挂载函数，执行语句：vm.$mount(vm.$options.el);','font-size:1.5em;color:red;background-color:pink;');
     el = el && query(el);
 
     /* istanbul ignore if */

@@ -272,7 +272,7 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // component v-model
   if (el.model) {
-    debugger
+    
     data += `model:{value:${
       el.model.value
     },callback:${

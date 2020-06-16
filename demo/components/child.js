@@ -1,6 +1,9 @@
 
   export const child = {
     name: 'child',
+    props:{
+      'childType':String
+    },
     data() {
       return {
         items: [
@@ -18,7 +21,7 @@
     },
     template:`<div class="child">
       <div>
-        <span>child:</span>
+        <span>childType:childType</span>
         <ul>
           <li v-for="item in items" :key="item.id">{{ item.val }}</li>
         </ul>

@@ -17,12 +17,12 @@ export const createCompiler = createCompilerCreator(function baseCompile (
     optimize(ast, options)
   }
   const code = generate(ast, options)
-  console.log('%ctemplate:','color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em')
+  console.log('%c<template>==========================================','color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em')
   console.log(`${template.trim()}`)
-  console.log("%c==========================================",'color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em')
-  console.log('%crender函数:','color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em')
+  console.log("%c</template>==========================================",'color: yellow; font-style: italic; background-color: blue;padding: 2px;font-size:2em')
+  console.log('%c<render函数>==========================================','color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em')
   console.log(`${code.render}`)
-  console.log("%c==========================================",'color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em')
+  console.log("%c</render函数>==========================================",'color: white; font-style: italic; background-color: black;padding: 2px;font-size:2em')
   return {
     ast,
     render: code.render,

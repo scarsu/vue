@@ -136,6 +136,7 @@ export function createPatchFunction (backend) {
     ownerArray,
     index
   ) {
+    console.log('%c 执行 patch 的核心函数 createElm，创建dom','font-size:1.5em;color:red;background-color:pink;')
     if (isDef(vnode.elm) && isDef(ownerArray)) {
       // This vnode was used in a previous render!
       // now it's used as a new node, overwriting its elm would cause
@@ -222,6 +223,7 @@ export function createPatchFunction (backend) {
   }
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+    console.log('%c 执行 createComponent 函数，创建组件','font-size:1.5em;color:red;background-color:pink;')
     let i = vnode.data
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
@@ -300,6 +302,7 @@ export function createPatchFunction (backend) {
   function createChildren (vnode, children, insertedVnodeQueue) {
     // 深度优先遍历
     // 递归调用 createElm
+    console.log('%c 执行 patch 的相关函数 createChildren，深度优先遍历 vnode树，递归调用createElm','font-size:1.5em;color:red;background-color:pink;')
     if (Array.isArray(children)) {
       if (process.env.NODE_ENV !== 'production') {
         checkDuplicateKeys(children)
@@ -716,8 +719,8 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
-    // hydrating表示是否是服务端渲染
 
+    // hydrating表示是否是服务端渲染
     // 初次render 传入的oldVnode是 vm.$el
     // vnode参数来自于render函数的返回值
     if (isUndef(vnode)) {
@@ -730,12 +733,14 @@ export function createPatchFunction (backend) {
     const insertedVnodeQueue = []
 
     if (isUndef(oldVnode)) {
+      console.log('%c 执行 vm.__patch__，初次渲染，将vdom转为DOM，放在vnode.elm上返回','font-size:1.5em;color:red;background-color:pink;')
       // 不传入oldVnode的情况：空挂载组件、new一个根组件
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       // 直接创建DOM : vnode.elm
       createElm(vnode, insertedVnodeQueue)
     } else {
+      console.log('%c 执行 vm.__patch__，更新渲染，将vdom转为DOM，放在vnode.elm上返回','font-size:1.5em;color:red;background-color:pink;')
       // 判断oldVnode是DOM：oldVnode.nodeType有值
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {

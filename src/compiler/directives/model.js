@@ -72,7 +72,7 @@ export function parseModel (val: string): ModelParseResult {
   // allow v-model="obj.val " (trailing whitespace)
   val = val.trim()
   len = val.length
-debugger
+
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     index = val.lastIndexOf('.')
     if (index > -1) {

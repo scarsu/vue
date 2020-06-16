@@ -34,6 +34,7 @@ export function createElement (
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
   if (Array.isArray(data) || isPrimitive(data)) {
+    // 如果data传的是数组，作为子节点处理
     normalizationType = children
     children = data
     data = undefined
@@ -53,6 +54,7 @@ export function _createElement (
 ): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
+      // 传给vnode的data属性，不允许使用响应式数据，每次渲染都创建最新的vnode data 对象
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
       'Always create fresh vnode data objects in each render!',
       context

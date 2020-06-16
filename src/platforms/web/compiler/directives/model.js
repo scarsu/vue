@@ -11,6 +11,7 @@ let warn
 export const RANGE_TOKEN = '__r'
 export const CHECKBOX_RADIO_TOKEN = '__c'
 
+// model指令对应的代码生成处理函数
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
@@ -124,6 +125,10 @@ function genSelect (
   addHandler(el, 'change', code, null, true)
 }
 
+// 默认的model指令处理函数，对应input和textarea类型节点
+// 核心逻辑1.将data赋值给节点的value属性，data变更可以触发节点value变更
+// 核心逻辑2.给节点添加 input事件处理函数，将用户输入值绑定到data上
+// 类似 if($event.target.composing)return;dataXX=$event.target.value
 function genDefaultModel (
   el: ASTElement,
   value: string,

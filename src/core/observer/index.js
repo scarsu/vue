@@ -47,7 +47,7 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)  //将observer实例 添加至value的__ob__属性，例如：vm._data.__ob__
     if (Array.isArray(value)) {
-      debugger
+      
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -177,7 +177,7 @@ export function defineReactive (
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      debugger
+      
       // 调用属性原 getter
       const value = getter ? getter.call(obj) : val
       
@@ -193,7 +193,7 @@ export function defineReactive (
       return value
     },
     set: function reactiveSetter (newVal) {
-      debugger
+      
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {

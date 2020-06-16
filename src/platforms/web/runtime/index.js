@@ -48,6 +48,7 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  console.log('%c开始执行 vm.$mount 挂载函数，执行语句：Vue.prototype.$mount.call(this, el, hydrating)','font-size:1.5em;color:red;background-color:pink;')
   el = el && inBrowser ? query(el) : undefined
   return mountComponent(this, el, hydrating)
 }
