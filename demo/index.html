@@ -7,9 +7,10 @@
 </head>
 <body>
   <div id="app">
-    <span>app:{{messageA}}</span>
+    <div>app:{{messageA}}</div>
+    <div>rootVmProp:{{rootVmProp}}</div>
     <input v-model="messageA" type="text"/>
-    <child child-type="text"/>
+    <child/>
   </div>
   <script src="./index.js"></script>
 </body>

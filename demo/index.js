@@ -6,6 +6,12 @@ const {child} = require('./components/child')
 debugger
 new Vue({
   el:"#app",
+  props:{
+    rootVmProp:{
+      type:String,
+      default:'rootVmProp'
+    }
+  },
   components: {child},
   data:()=>{
     return { 

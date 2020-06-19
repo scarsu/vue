@@ -75,17 +75,23 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
+  // 根实例的props需要转换 shouldObserve 为 false
+  // 只有根实例的props要当作 datas 处理(没有父组件)，创建observer
   debugger
   if (!isRoot) {
-    toggleObserving(false)
+    toggleObserving(false)  
   }
   for (const key in propsOptions) {
     // 将props的键缓存起来，以便于后续的props更新可以使用数组循环，而不是动态对象的键枚举(数组遍历的性能高很多)
     keys.push(key)
-    const value = validateProp(key, propsOptions, propsData, vm)
+
+    // 校验props类型
+    const value = validateProp(key, propsOptions, propsData, vm)  
+    
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       const hyphenatedKey = hyphenate(key)  //转连字符格式键
+      // 预留属性检测
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
         warn(
@@ -93,6 +99,8 @@ function initProps (vm: Component, propsOptions: Object) {
           vm
         )
       }
+
+      // 响应式（开发环境告警：避免在组件中直接变更prop，因为随时可能被父组件传来的prop覆盖
       defineReactive(props, key, value, () => {
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
@@ -105,14 +113,17 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 响应式
       defineReactive(props, key, value)
     }
+    // 将 vm._props.propKey 代理至 vm.propKey
     // 静态props 已经在Vue.extend()过程中 被代理至vm的原型上.
     // 此处只需要代理实例化过程中定义的props.
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
   }
+  // 恢复 shouldObserve 为 true
   toggleObserving(true)
 }
 

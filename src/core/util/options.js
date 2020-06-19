@@ -384,6 +384,8 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
+ * 将两个options合并成一个
+ * 在实例化和继承时都会用到的 核心工具函数
  */
 export function mergeOptions (
   parent: Object,

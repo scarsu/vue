@@ -1568,6 +1568,8 @@
   /**
    * Merge two option objects into a new one.
    * Core utility used in both instantiation and inheritance.
+   * 将两个options合并成一个
+   * 在实例化和继承时都会用到的 核心工具函数
    */
   function mergeOptions (
     parent,
@@ -1714,6 +1716,7 @@
     }
     // the raw prop value was also undefined from previous render,
     // return previous default value to avoid unnecessary watcher trigger
+    debugger
     if (vm && vm.$options.propsData &&
       vm.$options.propsData[key] === undefined &&
       vm._props[key] !== undefined
@@ -3588,17 +3591,23 @@
     var keys = vm.$options._propKeys = [];
     var isRoot = !vm.$parent;
     // root instance props should be converted
+    // 根实例的props需要转换 shouldObserve 为 false
+    // 只有根实例的props要当作 datas 处理(没有父组件)，创建observer
     debugger
     if (!isRoot) {
-      toggleObserving(false);
+      toggleObserving(false);  
     }
     var loop = function ( key ) {
       // 将props的键缓存起来，以便于后续的props更新可以使用数组循环，而不是动态对象的键枚举(数组遍历的性能高很多)
       keys.push(key);
-      var value = validateProp(key, propsOptions, propsData, vm);
+
+      // 校验props类型
+      var value = validateProp(key, propsOptions, propsData, vm);  
+      
       /* istanbul ignore else */
       {
         var hyphenatedKey = hyphenate(key);  //转连字符格式键
+        // 预留属性检测
         if (isReservedAttribute(hyphenatedKey) ||
             config.isReservedAttr(hyphenatedKey)) {
           warn(
@@ -3606,6 +3615,8 @@
             vm
           );
         }
+
+        // 响应式（开发环境告警：避免在组件中直接变更prop，因为随时可能被父组件传来的prop覆盖
         defineReactive(props, key, value, function () {
           if (!isRoot && !isUpdatingChildComponent) {
             warn(
@@ -3618,6 +3629,7 @@
           }
         });
       }
+      // 将 vm._props.propKey 代理至 vm.propKey
       // 静态props 已经在Vue.extend()过程中 被代理至vm的原型上.
       // 此处只需要代理实例化过程中定义的props.
       if (!(key in vm)) {
@@ -3626,6 +3638,7 @@
     };
 
     for (var key in propsOptions) loop( key );
+    // 恢复 shouldObserve 为 true
     toggleObserving(true);
   }
 
@@ -4893,6 +4906,7 @@
 
       var startTag, endTag;
       /* istanbul ignore if */
+      // 性能监控
       if ( config.performance && mark) {
         startTag = "vue-perf-start:" + (vm._uid);
         endTag = "vue-perf-end:" + (vm._uid);
@@ -4906,6 +4920,9 @@
         // optimize internal component instantiation
         // since dynamic options merging is pretty slow, and none of the
         // internal component options needs special treatment.
+
+        // 用 _isComponent 标识内置组件
+        // 优化内置组件的实例化，因为动态options合并很慢，内置组件的options也不需要特殊处理
         initInternalComponent(vm, options);
       } else {
         vm.$options = mergeOptions(
