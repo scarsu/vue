@@ -1432,11 +1432,14 @@
     key
   ) {
     if (childVal && "development" !== 'production') {
+      // 纯原生js Object判断
       assertObjectType(key, childVal, vm);
     }
     if (!parentVal) { return childVal }
     var ret = Object.create(null);
+    //将parent键拷贝在ret上
     extend(ret, parentVal);
+    //将child键拷贝在ret上，会覆盖parent
     if (childVal) { extend(ret, childVal); }
     return ret
   };
@@ -1478,6 +1481,7 @@
   /**
    * Ensure all props option syntax are normalized into the
    * Object-based format.
+   * 确保所有 props 选项语法都被规范化为对象格式
    */
   function normalizeProps (options, vm) {
     var props = options.props;
@@ -1485,6 +1489,7 @@
     var res = {};
     var i, val, name;
     if (Array.isArray(props)) {
+      // props是数组类型：数组元素只能是string格式，作为prop键名，键名转为驼峰格式，键值是对象{ type: null }
       i = props.length;
       while (i--) {
         val = props[i];
@@ -1496,6 +1501,7 @@
         }
       }
     } else if (isPlainObject(props)) {
+      // props是对象格式，键值也要转为对象格式{ type: null }
       for (var key in props) {
         val = props[key];
         name = camelize(key);
@@ -1511,6 +1517,32 @@
       );
     }
     options.props = res;
+  /* 
+    原始props格式：
+    props:['prop_a','prop_b','prop_c']
+    转化后：
+    props:{
+      propA:{ type: null },
+      propB:{ type: null },
+      propC:{ type: null }
+    }
+
+    原始props格式：
+    props:{
+      'prop_a':'string',
+      'prop_b':'number',
+      'prop_c':{
+        type:String,
+        default:'c'
+      }
+    }
+    转化后：
+    props:{
+      propA:{ type: 'string' },
+      propB:{ type: 'number' },
+      propC:{ type:String, default:'c'}
+    }
+   */
   }
 
   /**
@@ -1577,6 +1609,7 @@
     vm
   ) {
     {
+      // 检查子组件组件名：命名规范，内置组件/预留组件重名
       checkComponents(child);
     }
 
@@ -1584,6 +1617,7 @@
       child = child.options;
     }
 
+    //对props/inject/directives选项执行规范化
     normalizeProps(child, vm);
     normalizeInject(child, vm);
     normalizeDirectives(child);
@@ -1659,17 +1693,20 @@
 
   function validateProp (
     key,
-    propOptions,
+    propOptions,  // 用户定义的props选项
     propsData,
     vm
   ) {
+    debugger
     var prop = propOptions[key];
-    var absent = !hasOwn(propsData, key);
-    var value = propsData[key];
+    var absent = !hasOwn(propsData, key);  // 用户定义的propsData选项
+    var value = propsData[key];  // 用户定义的prop值
     // boolean casting
-    var booleanIndex = getTypeIndex(Boolean, prop.type);
+    var booleanIndex = getTypeIndex(Boolean, prop.type); // 判断当前prop类型是否 =Boolean 或者 包含Boolean
     if (booleanIndex > -1) {
+      //对于boolean类型的prop
       if (absent && !hasOwn(prop, 'default')) {
+        //用户未给prop赋值且无默认值，设prop值为false
         value = false;
       } else if (value === '' || value === hyphenate(key)) {
         // only cast empty string / same name to boolean if
@@ -1716,7 +1753,6 @@
     }
     // the raw prop value was also undefined from previous render,
     // return previous default value to avoid unnecessary watcher trigger
-    debugger
     if (vm && vm.$options.propsData &&
       vm.$options.propsData[key] === undefined &&
       vm._props[key] !== undefined
@@ -3593,7 +3629,6 @@
     // root instance props should be converted
     // 根实例的props需要转换 shouldObserve 为 false
     // 只有根实例的props要当作 datas 处理(没有父组件)，创建observer
-    debugger
     if (!isRoot) {
       toggleObserving(false);  
     }
@@ -4917,10 +4952,6 @@
       vm._isVue = true;
       // merge options
       if (options && options._isComponent) {
-        // optimize internal component instantiation
-        // since dynamic options merging is pretty slow, and none of the
-        // internal component options needs special treatment.
-
         // 用 _isComponent 标识内置组件
         // 优化内置组件的实例化，因为动态options合并很慢，内置组件的options也不需要特殊处理
         initInternalComponent(vm, options);

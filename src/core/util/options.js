@@ -248,11 +248,14 @@ strats.computed = function (
   key: string
 ): ?Object {
   if (childVal && process.env.NODE_ENV !== 'production') {
+    // 纯原生js Object判断
     assertObjectType(key, childVal, vm)
   }
   if (!parentVal) return childVal
   const ret = Object.create(null)
+  //将parent键拷贝在ret上
   extend(ret, parentVal)
+  //将child键拷贝在ret上，会覆盖parent
   if (childVal) extend(ret, childVal)
   return ret
 }
@@ -294,6 +297,7 @@ export function validateComponentName (name: string) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ * 确保所有 props 选项语法都被规范化为对象格式
  */
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
@@ -301,6 +305,7 @@ function normalizeProps (options: Object, vm: ?Component) {
   const res = {}
   let i, val, name
   if (Array.isArray(props)) {
+    // props是数组类型：数组元素只能是string格式，作为prop键名，键名转为驼峰格式，键值是对象{ type: null }
     i = props.length
     while (i--) {
       val = props[i]
@@ -312,6 +317,7 @@ function normalizeProps (options: Object, vm: ?Component) {
       }
     }
   } else if (isPlainObject(props)) {
+    // props是对象格式，键值也要转为对象格式{ type: null }
     for (const key in props) {
       val = props[key]
       name = camelize(key)
@@ -327,6 +333,32 @@ function normalizeProps (options: Object, vm: ?Component) {
     )
   }
   options.props = res
+/* 
+  原始props格式：
+  props:['prop_a','prop_b','prop_c']
+  转化后：
+  props:{
+    propA:{ type: null },
+    propB:{ type: null },
+    propC:{ type: null }
+  }
+
+  原始props格式：
+  props:{
+    'prop_a':'string',
+    'prop_b':'number',
+    'prop_c':{
+      type:String,
+      default:'c'
+    }
+  }
+  转化后：
+  props:{
+    propA:{ type: 'string' },
+    propB:{ type: 'number' },
+    propC:{ type:String, default:'c'}
+  }
+ */
 }
 
 /**
@@ -393,6 +425,7 @@ export function mergeOptions (
   vm?: Component
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
+    // 检查子组件组件名：命名规范，内置组件/预留组件重名
     checkComponents(child)
   }
 
@@ -400,6 +433,7 @@ export function mergeOptions (
     child = child.options
   }
 
+  //对props/inject/directives选项执行规范化
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)

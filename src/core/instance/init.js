@@ -32,10 +32,6 @@ export function initMixin (Vue: Class<Component>) {
     vm._isVue = true
     // merge options
     if (options && options._isComponent) {
-      // optimize internal component instantiation
-      // since dynamic options merging is pretty slow, and none of the
-      // internal component options needs special treatment.
-
       // 用 _isComponent 标识内置组件
       // 优化内置组件的实例化，因为动态options合并很慢，内置组件的options也不需要特殊处理
       initInternalComponent(vm, options)

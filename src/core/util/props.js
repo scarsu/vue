@@ -20,17 +20,20 @@ type PropOptions = {
 
 export function validateProp (
   key: string,
-  propOptions: Object,
+  propOptions: Object,  // 用户定义的props选项
   propsData: Object,
   vm?: Component
 ): any {
+  debugger
   const prop = propOptions[key]
-  const absent = !hasOwn(propsData, key)
-  let value = propsData[key]
+  const absent = !hasOwn(propsData, key)  // 用户定义的propsData选项
+  let value = propsData[key]  // 用户定义的prop值
   // boolean casting
-  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  const booleanIndex = getTypeIndex(Boolean, prop.type) // 判断当前prop类型是否 =Boolean 或者 包含Boolean
   if (booleanIndex > -1) {
+    //对于boolean类型的prop
     if (absent && !hasOwn(prop, 'default')) {
+      //用户未给prop赋值且无默认值，设prop值为false
       value = false
     } else if (value === '' || value === hyphenate(key)) {
       // only cast empty string / same name to boolean if
@@ -81,7 +84,6 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   }
   // the raw prop value was also undefined from previous render,
   // return previous default value to avoid unnecessary watcher trigger
-  debugger
   if (vm && vm.$options.propsData &&
     vm.$options.propsData[key] === undefined &&
     vm._props[key] !== undefined
