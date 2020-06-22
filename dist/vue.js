@@ -1432,14 +1432,16 @@
     key
   ) {
     if (childVal && "development" !== 'production') {
-      // 纯原生js Object判断
+      // 因为即将执行浅拷贝，因此需要判断childObj
+      // 判断childObj是否是纯原生js Object，否则warn
       assertObjectType(key, childVal, vm);
     }
+    // 如果parentVal不存在，直接返回child
     if (!parentVal) { return childVal }
     var ret = Object.create(null);
-    //将parent键拷贝在ret上
+    //将parent浅拷贝在ret上
     extend(ret, parentVal);
-    //将child键拷贝在ret上，会覆盖parent
+    //将child浅拷贝在ret上，会覆盖parent
     if (childVal) { extend(ret, childVal); }
     return ret
   };
@@ -1626,6 +1628,9 @@
     // but only if it is a raw options object that isn't
     // the result of another mergeOptions call.
     // Only merged options has the _base property.
+    // 对子options应用extends和mixins
+    // 但前提是它是原始options，而不是另一个mergeOptions调用的结果
+    // 只有合并过的options才具有_base属性。
     if (!child._base) {
       if (child.extends) {
         parent = mergeOptions(parent, child.extends, vm);
@@ -1637,17 +1642,22 @@
       }
     }
 
-    var options = {};
+    var options = {}; // options作为mergeOptions的返回结果
     var key;
+
+    // 按键遍历parent child，对键的并集执行mergeField（重复的key只执行一次）
     for (key in parent) {
       mergeField(key);
     }
     for (key in child) {
+      // 避免对parent上的相同键重复执行mergeField
       if (!hasOwn(parent, key)) {
         mergeField(key);
       }
     }
+
     function mergeField (key) {
+      // 不同的options选项(components filters directives data props...)，对应了不同的合并规则
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
     }
@@ -3627,8 +3637,7 @@
     var keys = vm.$options._propKeys = [];
     var isRoot = !vm.$parent;
     // root instance props should be converted
-    // 根实例的props需要转换 shouldObserve 为 false
-    // 只有根实例的props要当作 datas 处理(没有父组件)，创建observer
+    // 根实例的props需要转换 shouldObserve 为 false，当作 datas 处理(没有父组件，不需要创建观察者)
     if (!isRoot) {
       toggleObserving(false);  
     }

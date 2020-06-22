@@ -26,19 +26,22 @@ export function validateProp (
 ): any {
   debugger
   const prop = propOptions[key]
-  const absent = !hasOwn(propsData, key)  // 用户定义的propsData选项
-  let value = propsData[key]  // 用户定义的prop值
+  const absent = !hasOwn(propsData, key)  // 用户定义的propsData选项：prop的值
+  let value = propsData[key]  // 用户定义的propsData选项：prop的值
   // boolean casting
   const booleanIndex = getTypeIndex(Boolean, prop.type) // 判断当前prop类型是否 =Boolean 或者 包含Boolean
   if (booleanIndex > -1) {
-    //对于boolean类型的prop
+    //对于包含boolean类型的prop
     if (absent && !hasOwn(prop, 'default')) {
       //用户未给prop赋值且无默认值，设prop值为false
       value = false
     } else if (value === '' || value === hyphenate(key)) {
       // only cast empty string / same name to boolean if
       // boolean has higher priority
-      const stringIndex = getTypeIndex(String, prop.type)
+      // 用户定义的prop值 ='' 或者 =prop键名
+      // 且 prop类型中不包含string 或 prop类型中boolean优先级比string高
+      // 那么，设prop值为true
+      const stringIndex = getTypeIndex(String, prop.type) 
       if (stringIndex < 0 || booleanIndex < stringIndex) {
         value = true
       }

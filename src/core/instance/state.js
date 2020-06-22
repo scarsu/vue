@@ -75,8 +75,7 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
-  // 根实例的props需要转换 shouldObserve 为 false
-  // 只有根实例的props要当作 datas 处理(没有父组件)，创建observer
+  // 根实例的props需要转换 shouldObserve 为 false，当作 datas 处理(没有父组件，不需要创建观察者)
   if (!isRoot) {
     toggleObserving(false)  
   }
