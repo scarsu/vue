@@ -28,7 +28,7 @@ export function validateProp (
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)  // 用户定义的propsData选项：prop的值
   let value = propsData[key]  // 用户定义的propsData选项：prop的值
-  // boolean casting
+  // boolean类型 默认值处理
   const booleanIndex = getTypeIndex(Boolean, prop.type) // 判断当前prop类型是否 =Boolean 或者 包含Boolean
   if (booleanIndex > -1) {
     //对于包含boolean类型的prop
@@ -41,13 +41,13 @@ export function validateProp (
       // 用户定义的prop值 ='' 或者 =prop键名
       // 且 prop类型中不包含string 或 prop类型中boolean优先级比string高
       // 那么，设prop值为true
-      const stringIndex = getTypeIndex(String, prop.type) 
+      const stringIndex = getTypeIndex(String, prop.type)
       if (stringIndex < 0 || booleanIndex < stringIndex) {
         value = true
       }
     }
   }
-  // check default value
+  // 用户未定义prop值，通过getPropDefaultValue方法获取默认值
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
