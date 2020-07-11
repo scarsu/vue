@@ -21,8 +21,25 @@ new Vue({
     }
   },
   mounted(){
-    debugger
-    this.messageA="new"
+    console.error('sync code start====================================')
+
+    // this.messageA=Math.random()
+
+
+    this.$nextTick(()=>{
+      console.error('nextTick1')
+    })
+
+
+    Promise.resolve().then(()=>{
+      console.error('promise')
+    })
+
+    this.$nextTick(()=>{
+      console.error('nextTick2')
+    })
+
+    console.error('sync code end====================================')
   },
   computed: {
     message:{

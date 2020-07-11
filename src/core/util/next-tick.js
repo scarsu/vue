@@ -3,19 +3,21 @@
 /* 全局的 变更观察者 */
 
 import { noop } from 'shared/util'
-import { handleError } from './error'
+// // import { handleError } from './error'
 import { isIE, isIOS, isNative } from './env'
 
 const callbacks = []
 let pending = false
 
 function flushCallbacks () {
+  // console.error('nexttick 任务队列 开始“同步”执行')
   pending = false
   const copies = callbacks.slice(0)
   callbacks.length = 0
   for (let i = 0; i < copies.length; i++) {
     copies[i]()
   }
+  // console.error('nexttick 任务队列 执行结束')
 }
 // 在<=2.4版本中，vue使用的全是微任务来实现异步延迟
   // 缺点是在某些场景下，微任务拥有过高的优先级，使其在本应连续的事件甚至同一事件的冒泡过程中被触发
@@ -100,13 +102,18 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 }
 
 export function nextTick (cb?: Function, ctx?: Object) {
+  if(ctx){
+    // console.error('nextTick被手动调用')
+  }else{
+    // console.error('执行了nextTick(flushSchedulerQueue)')
+  }
   let _resolve
   callbacks.push(() => {
     if (cb) {
       try {
         cb.call(ctx)
       } catch (e) {
-        handleError(e, ctx, 'nextTick')
+        // handleError(e, ctx, 'nextTick')
       }
     } else if (_resolve) {
       _resolve(ctx)

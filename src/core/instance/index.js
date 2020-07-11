@@ -27,18 +27,12 @@ console.log("Vue instance created")
 }
 console.log("Vue class created")
 
-// 给vm扩展_init私有方法，该方法的核心是执行 vm.$mount
-initMixin(Vue)
 
-// 给vm扩展$set、$delete、$watch方法，$data、$props属性
-stateMixin(Vue)
-
-// 给vm扩展$on、$once、$off、$emit方法
-eventsMixin(Vue)
-
-// 给vm扩展_update私有方法、$forceUpdate、$destroy方法
-// 其中_update私有方法负责执行src/core/vdom/下定义的patch，将VNode渲染为真实的DOM
-lifecycleMixin(Vue)
+initMixin(Vue)  // 给vm扩展_init私有方法，该方法的核心是执行 vm.$mount
+stateMixin(Vue) // 给vm扩展$set、$delete、$watch方法，$data、$props属性
+eventsMixin(Vue)  // 给vm扩展$on、$once、$off、$emit方法
+lifecycleMixin(Vue) // 给vm扩展_update私有方法、$forceUpdate、$destroy方法
+// _update私有方法负责执行src/core/vdom/下定义的patch，将VNode渲染为真实的DOM
 
 // 给vm扩展$nextTick方法、_render私有方法
 // 其中_render私有方法负责执行render函数，输出VNode

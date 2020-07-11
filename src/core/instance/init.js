@@ -50,13 +50,13 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    initRender(vm)
-    callHook(vm, 'beforeCreate')
-    initInjections(vm) // resolve injections before data/props
-    initState(vm) // 将data/props转换为响应式对象
-    initProvide(vm) // resolve provide after data/props
+    initLifecycle(vm) // $parent,$root,$children,$refs         
+    initEvents(vm)// 处理父组件传递的事件和回调
+    initRender(vm)// $slots,$scopedSlots,_c,$createElement
+    callHook(vm, 'beforeCreate')// 初始化props，methods，data，computed，watch
+    initInjections(vm) // 从祖先获取数据注入
+    initState(vm) // 初始化props，methods，data，computed，watch，将data/props转换为响应式对象
+    initProvide(vm) // 向后代提供数据注入
     callHook(vm, 'created')
 
     /* istanbul ignore if */

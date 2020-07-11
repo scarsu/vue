@@ -737,6 +737,7 @@
   };
 
   Dep.prototype.notify = function notify () {
+    // debugger
     // 通过slice方法复制一个subs数组
     var subs = this.subs.slice();
     if ( !config.async) {
@@ -1707,27 +1708,30 @@
     propsData,
     vm
   ) {
-    debugger
+    // debugger
     var prop = propOptions[key];
-    var absent = !hasOwn(propsData, key);  // 用户定义的propsData选项
-    var value = propsData[key];  // 用户定义的prop值
-    // boolean casting
+    var absent = !hasOwn(propsData, key);  // 用户定义的propsData选项：prop的值
+    var value = propsData[key];  // 用户定义的propsData选项：prop的值
+    // boolean类型 默认值处理
     var booleanIndex = getTypeIndex(Boolean, prop.type); // 判断当前prop类型是否 =Boolean 或者 包含Boolean
     if (booleanIndex > -1) {
-      //对于boolean类型的prop
+      //对于包含boolean类型的prop
       if (absent && !hasOwn(prop, 'default')) {
         //用户未给prop赋值且无默认值，设prop值为false
         value = false;
       } else if (value === '' || value === hyphenate(key)) {
         // only cast empty string / same name to boolean if
         // boolean has higher priority
+        // 用户定义的prop值 ='' 或者 =prop键名
+        // 且 prop类型中不包含string 或 prop类型中boolean优先级比string高
+        // 那么，设prop值为true
         var stringIndex = getTypeIndex(String, prop.type);
         if (stringIndex < 0 || booleanIndex < stringIndex) {
           value = true;
         }
       }
     }
-    // check default value
+    // 用户未定义prop值，通过getPropDefaultValue方法获取默认值
     if (value === undefined) {
       value = getPropDefaultValue(vm, prop, key);
       // since the default value is a fresh copy,
@@ -1992,12 +1996,14 @@
   var pending = false;
 
   function flushCallbacks () {
+    // console.error('nexttick 任务队列 开始“同步”执行')
     pending = false;
     var copies = callbacks.slice(0);
     callbacks.length = 0;
     for (var i = 0; i < copies.length; i++) {
       copies[i]();
     }
+    // console.error('nexttick 任务队列 执行结束')
   }
   // 在<=2.4版本中，vue使用的全是微任务来实现异步延迟
     // 缺点是在某些场景下，微任务拥有过高的优先级，使其在本应连续的事件甚至同一事件的冒泡过程中被触发
@@ -2088,7 +2094,7 @@
         try {
           cb.call(ctx);
         } catch (e) {
-          handleError(e, ctx, 'nextTick');
+          // handleError(e, ctx, 'nextTick')
         }
       } else if (_resolve) {
         _resolve(ctx);
@@ -3227,6 +3233,7 @@
    * Flush both queues and run the watchers.
    */
   function flushSchedulerQueue () {
+    // console.error('flushSchedulerQueue被调用，watcher队列任务 开始“同步”执行')
     flushing = true;
     var watcher, id;
 
@@ -3278,6 +3285,7 @@
     var activatedQueue = activatedChildren.slice();
     var updatedQueue = queue.slice();
 
+    // console.error('flushSchedulerQueue执行结束')
     resetSchedulerState();
 
     // call component updated and activated hooks
@@ -3329,9 +3337,11 @@
    * 重复的watcher id的任务会被跳过，除非队列已经被清空
    */
   function queueWatcher (watcher) {
+    debugger
     var id = watcher.id;
     if (has[id] == null) {
       has[id] = true;
+      // console.error('watcher：'+id+'被触发，立即被添加到 Scheduler Queues 队列')
       if (!flushing) {
         queue.push(watcher);
       } else {
@@ -4977,13 +4987,13 @@
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
-      initRender(vm);
-      callHook(vm, 'beforeCreate');
-      initInjections(vm); // resolve injections before data/props
-      initState(vm); // 将data/props转换为响应式对象
-      initProvide(vm); // resolve provide after data/props
+      initLifecycle(vm); // $parent,$root,$children,$refs         
+      initEvents(vm);// 处理父组件传递的事件和回调
+      initRender(vm);// $slots,$scopedSlots,_c,$createElement
+      callHook(vm, 'beforeCreate');// 初始化props，methods，data，computed，watch
+      initInjections(vm); // 从祖先获取数据注入
+      initState(vm); // 初始化props，methods，data，computed，watch，将data/props转换为响应式对象
+      initProvide(vm); // 向后代提供数据注入
       callHook(vm, 'created');
 
       /* istanbul ignore if */
@@ -5077,18 +5087,12 @@
   }
   console.log("Vue class created");
 
-  // 给vm扩展_init私有方法，该方法的核心是执行 vm.$mount
-  initMixin(Vue);
 
-  // 给vm扩展$set、$delete、$watch方法，$data、$props属性
-  stateMixin(Vue);
-
-  // 给vm扩展$on、$once、$off、$emit方法
-  eventsMixin(Vue);
-
-  // 给vm扩展_update私有方法、$forceUpdate、$destroy方法
-  // 其中_update私有方法负责执行src/core/vdom/下定义的patch，将VNode渲染为真实的DOM
-  lifecycleMixin(Vue);
+  initMixin(Vue);  // 给vm扩展_init私有方法，该方法的核心是执行 vm.$mount
+  stateMixin(Vue); // 给vm扩展$set、$delete、$watch方法，$data、$props属性
+  eventsMixin(Vue);  // 给vm扩展$on、$once、$off、$emit方法
+  lifecycleMixin(Vue); // 给vm扩展_update私有方法、$forceUpdate、$destroy方法
+  // _update私有方法负责执行src/core/vdom/下定义的patch，将VNode渲染为真实的DOM
 
   // 给vm扩展$nextTick方法、_render私有方法
   // 其中_render私有方法负责执行render函数，输出VNode
@@ -11759,3 +11763,4 @@
   return Vue;
 
 })));
+//# sourceMappingURL=vue.js.map

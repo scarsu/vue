@@ -39,6 +39,7 @@ export default class Dep {
   }
 
   notify () {
+    // debugger
     // 通过slice方法复制一个subs数组
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {

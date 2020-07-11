@@ -24,7 +24,7 @@ export function validateProp (
   propsData: Object,
   vm?: Component
 ): any {
-  debugger
+  // debugger
   const prop = propOptions[key]
   const absent = !hasOwn(propsData, key)  // 用户定义的propsData选项：prop的值
   let value = propsData[key]  // 用户定义的propsData选项：prop的值

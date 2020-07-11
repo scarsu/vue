@@ -47,6 +47,7 @@ function resetSchedulerState () {
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
+  // console.error('flushSchedulerQueue被调用，watcher队列任务 开始“同步”执行')
   flushing = true
   let watcher, id
 
@@ -98,6 +99,7 @@ function flushSchedulerQueue () {
   const activatedQueue = activatedChildren.slice()
   const updatedQueue = queue.slice()
 
+  // console.error('flushSchedulerQueue执行结束')
   resetSchedulerState()
 
   // call component updated and activated hooks
@@ -149,9 +151,11 @@ function callActivatedHooks (queue) {
  * 重复的watcher id的任务会被跳过，除非队列已经被清空
  */
 export function queueWatcher (watcher: Watcher) {
+  debugger
   const id = watcher.id
   if (has[id] == null) {
     has[id] = true
+    // console.error('watcher：'+id+'被触发，立即被添加到 Scheduler Queues 队列')
     if (!flushing) {
       queue.push(watcher)
     } else {
